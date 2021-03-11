@@ -43,8 +43,7 @@ class FlutterWebviewPlugin {
   final _onHttpError = StreamController<WebViewHttpError>.broadcast();
   final _onPostMessage = StreamController<JavascriptMessage>.broadcast();
 
-  final Map<String, JavascriptChannel> _javascriptChannels =
-      <String, JavascriptChannel>{};
+  final Map<String, JavascriptChannel> _javascriptChannels = <String, JavascriptChannel>{};
 
   Future<Null> _handleMessages(MethodCall call) async {
     switch (call.method) {
@@ -74,12 +73,10 @@ class FlutterWebviewPlugin {
         );
         break;
       case 'onHttpError':
-        _onHttpError.add(
-            WebViewHttpError(call.arguments['code'], call.arguments['url']));
+        _onHttpError.add(WebViewHttpError(call.arguments['code'], call.arguments['url']));
         break;
       case 'javascriptChannelMessage':
-        _handleJavascriptChannelMessage(
-            call.arguments['channel'], call.arguments['message']);
+        _handleJavascriptChannelMessage(call.arguments['channel'], call.arguments['message']);
         break;
     }
   }
@@ -173,8 +170,7 @@ class FlutterWebviewPlugin {
       'clearCache': clearCache ?? false,
       'hidden': hidden ?? false,
       'clearCookies': clearCookies ?? false,
-      'mediaPlaybackRequiresUserGesture':
-          mediaPlaybackRequiresUserGesture ?? true,
+      'mediaPlaybackRequiresUserGesture': mediaPlaybackRequiresUserGesture ?? true,
       'enableAppScheme': enableAppScheme ?? true,
       'userAgent': userAgent,
       'withZoom': withZoom ?? false,
@@ -210,8 +206,7 @@ class FlutterWebviewPlugin {
       }
     }
 
-    args['javascriptChannelNames'] =
-        _extractJavascriptChannelNames(javascriptChannels).toList();
+    args['javascriptChannelNames'] = _extractJavascriptChannelNames(javascriptChannels).toList();
 
     if (rect != null) {
       args['rect'] = {
@@ -247,8 +242,7 @@ class FlutterWebviewPlugin {
   Future<bool> canGoBack() async => await _channel.invokeMethod('canGoBack');
 
   /// Checks if webview can navigate back
-  Future<bool> canGoForward() async =>
-      await _channel.invokeMethod('canGoForward');
+  Future<bool> canGoForward() async => await _channel.invokeMethod('canGoForward');
 
   /// Navigates forward on the Webview.
   Future<Null> goForward() async => await _channel.invokeMethod('forward');
@@ -271,6 +265,24 @@ class FlutterWebviewPlugin {
     await _channel.invokeMethod('reloadUrl', args);
   }
 
+  // get all cookies including HttpOnly
+  // but for ios, it only support ios 11 or above
+  Future<Map<String, String>> getAllCookies(String url) async {
+    final cookiesString = await _channel.invokeMethod('getAllCookies', {'url': url});
+    final cookies = <String, String>{};
+
+    if (cookiesString?.isNotEmpty == true) {
+      cookiesString.split(';').forEach((String cookie) {
+        if (cookie.isNotEmpty && cookie.contains('=')) {
+          final split = cookie.split('=');
+          cookies[split[0].trim()] = split[1].trim();
+        }
+      });
+    }
+
+    return cookies;
+  }
+
   // Clean cookies on WebView
   Future<Null> cleanCookies() async {
     // one liner to clear javascript cookies
@@ -280,8 +292,7 @@ class FlutterWebviewPlugin {
   }
 
   // Stops current loading process
-  Future<Null> stopLoading() async =>
-      await _channel.invokeMethod('stopLoading');
+  Future<Null> stopLoading() async => await _channel.invokeMethod('stopLoading');
 
   /// Close all Streams
   void dispose() {
@@ -329,14 +340,11 @@ class FlutterWebviewPlugin {
     return channelNames;
   }
 
-  void _handleJavascriptChannelMessage(
-      final String channelName, final String message) {
-    _javascriptChannels[channelName]
-        ?.onMessageReceived(JavascriptMessage(message));
+  void _handleJavascriptChannelMessage(final String channelName, final String message) {
+    _javascriptChannels[channelName]?.onMessageReceived(JavascriptMessage(message));
   }
 
-  void _assertJavascriptChannelNamesAreUnique(
-      final Set<JavascriptChannel>? channels) {
+  void _assertJavascriptChannelNamesAreUnique(final Set<JavascriptChannel>? channels) {
     if (channels == null || channels.isEmpty) {
       return;
     }
