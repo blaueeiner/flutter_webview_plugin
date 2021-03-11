@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 
 const kAndroidUserAgent =
@@ -84,7 +83,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
@@ -97,21 +96,21 @@ class _MyHomePageState extends State<MyHomePage> {
   final flutterWebViewPlugin = FlutterWebviewPlugin();
 
   // On destroy stream
-  StreamSubscription _onDestroy;
+  StreamSubscription? _onDestroy;
 
   // On urlChanged stream
-  StreamSubscription<String> _onUrlChanged;
+  StreamSubscription<String>? _onUrlChanged;
 
   // On urlChanged stream
-  StreamSubscription<WebViewStateChanged> _onStateChanged;
+  StreamSubscription<WebViewStateChanged>? _onStateChanged;
 
-  StreamSubscription<WebViewHttpError> _onHttpError;
+  StreamSubscription<WebViewHttpError>? _onHttpError;
 
-  StreamSubscription<double> _onProgressChanged;
+  StreamSubscription<double>? _onProgressChanged;
 
-  StreamSubscription<double> _onScrollYChanged;
+  StreamSubscription<double>? _onScrollYChanged;
 
-  StreamSubscription<double> _onScrollXChanged;
+  StreamSubscription<double>? _onScrollXChanged;
 
   final _urlCtrl = TextEditingController(text: selectedUrl);
 
@@ -135,8 +134,8 @@ class _MyHomePageState extends State<MyHomePage> {
     _onDestroy = flutterWebViewPlugin.onDestroy.listen((_) {
       if (mounted) {
         // Actions like show a info toast.
-        _scaffoldKey.currentState.showSnackBar(
-            const SnackBar(content: const Text('Webview Destroyed')));
+        _scaffoldKey.currentState!
+            .showSnackBar(const SnackBar(content: const Text('Webview Destroyed')));
       }
     });
 
@@ -149,8 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
 
-    _onProgressChanged =
-        flutterWebViewPlugin.onProgressChanged.listen((double progress) {
+    _onProgressChanged = flutterWebViewPlugin.onProgressChanged.listen((double progress) {
       if (mounted) {
         setState(() {
           _history.add('onProgressChanged: $progress');
@@ -158,8 +156,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
 
-    _onScrollYChanged =
-        flutterWebViewPlugin.onScrollYChanged.listen((double y) {
+    _onScrollYChanged = flutterWebViewPlugin.onScrollYChanged.listen((double y) {
       if (mounted) {
         setState(() {
           _history.add('Scroll in Y Direction: $y');
@@ -167,8 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
 
-    _onScrollXChanged =
-        flutterWebViewPlugin.onScrollXChanged.listen((double x) {
+    _onScrollXChanged = flutterWebViewPlugin.onScrollXChanged.listen((double x) {
       if (mounted) {
         setState(() {
           _history.add('Scroll in X Direction: $x');
@@ -176,8 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
 
-    _onStateChanged =
-        flutterWebViewPlugin.onStateChanged.listen((WebViewStateChanged state) {
+    _onStateChanged = flutterWebViewPlugin.onStateChanged.listen((WebViewStateChanged state) {
       if (mounted) {
         setState(() {
           _history.add('onStateChanged: ${state.type} ${state.url}');
@@ -185,8 +180,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
 
-    _onHttpError =
-        flutterWebViewPlugin.onHttpError.listen((WebViewHttpError error) {
+    _onHttpError = flutterWebViewPlugin.onHttpError.listen((WebViewHttpError error) {
       if (mounted) {
         setState(() {
           _history.add('onHttpError: ${error.code} ${error.url}');
@@ -198,13 +192,13 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void dispose() {
     // Every listener should be canceled, the same should be done with this stream.
-    _onDestroy.cancel();
-    _onUrlChanged.cancel();
-    _onStateChanged.cancel();
-    _onHttpError.cancel();
-    _onProgressChanged.cancel();
-    _onScrollXChanged.cancel();
-    _onScrollYChanged.cancel();
+    _onDestroy?.cancel();
+    _onUrlChanged?.cancel();
+    _onStateChanged?.cancel();
+    _onHttpError?.cancel();
+    _onProgressChanged?.cancel();
+    _onScrollXChanged?.cancel();
+    _onScrollYChanged?.cancel();
 
     flutterWebViewPlugin.dispose();
 
@@ -230,8 +224,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 flutterWebViewPlugin.launch(
                   selectedUrl,
-                  rect: Rect.fromLTWH(
-                      0.0, 0.0, MediaQuery.of(context).size.width, 300.0),
+                  rect: Rect.fromLTWH(0.0, 0.0, MediaQuery.of(context).size.width, 300.0),
                   userAgent: kAndroidUserAgent,
                   invalidUrlRegex:
                       r'^(https).+(twitter)', // prevent redirecting to twitter when user click on its icon in flutter website
@@ -263,9 +256,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             RaisedButton(
               onPressed: () {
-                final future =
-                    flutterWebViewPlugin.evalJavascript(_codeCtrl.text);
-                future.then((String result) {
+                final future = flutterWebViewPlugin.evalJavascript(_codeCtrl.text);
+                future.then((result) {
                   setState(() {
                     _history.add('eval: $result');
                   });
@@ -276,7 +268,7 @@ class _MyHomePageState extends State<MyHomePage> {
             RaisedButton(
               onPressed: () {
                 final future = flutterWebViewPlugin.evalJavascript('alert("Hello World");');
-                future.then((String result) {
+                future.then((result) {
                   setState(() {
                     _history.add('eval: $result');
                   });
